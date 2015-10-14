@@ -1,0 +1,49 @@
+config BR2_PACKAGE_DPDK
+       bool "dpdk"
+       depends on BR2_x86_i686 || BR2_x86_64 || BR2_powerpc_power8 || BR2_ARM_CPU_ARMV7A || BR2_aarch64 || BR2_aarch64_be
+       depends on BR2_TOOLCHAIN_USES_GLIBC
+       help
+         DPDK is a set of libraries and drivers for fast packet processing. It
+	 was designed to run on any processors knowing Intel x86 has been the
+	 first CPU to be supported. Ports for other CPUs like IBM Power 8 and
+	 ARM are under progress. It runs mostly in Linux userland. A FreeBSD
+	 port is now available for a subset of DPDK features.
+
+	 Notes:
+	 * To build the included Linux Kernel drivers, it is necessary to
+	   enable CONFIG_PCI_MSI, CONFIG_UIO.
+	 * To build the PCAP PMD properly, you need to enable the libpcap
+	   manually.
+	 * To install the python scripts (dpdk_nic_bind.py, cpu_layout.py),
+	   enable the python2 interpreter for the target.
+
+         http://www.dpdk.org/
+
+if BR2_PACKAGE_DPDK
+
+config BR2_PACKAGE_DPDK_CONFIG
+	string "Configuration"
+	default "i686-native-linuxapp-gcc" \
+		if BR2_x86_i686
+	default "x86_64-native-linuxapp-gcc" \
+		if BR2_x86_64
+	default "ppc_64-power8-native-linuxapp-gcc" \
+		if BR2_powerpc_power8
+	default "arm-armv7a-linuxapp-gcc" \
+		if BR2_ARM_CPU_ARMV7A
+	default "arm64-armv8a-linuxapp-gcc" \
+		if BR2_aarch64 || BR2_aarch64_be
+
+config BR2_PACKAGE_DPDK_TOOLS_TESTPMD
+	bool "Install testpmd"
+	default y
+	help
+	  Install application for general testing of DPDK and PMD drivers.
+
+config BR2_PACKAGE_DPDK_TOOLS_TEST
+	bool "Install tests suite"
+	help
+	  Install all DPDK tests. If you want to run the tests by the included
+	  autotest.py script you need to enable python manually.
+
+endif

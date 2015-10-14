@@ -1,0 +1,60 @@
+config BR2_PACKAGE_DPDK_ARCH_SUPPORTS
+	bool
+	depends on BR2_TOOLCHAIN_HAS_SYNC_1 &&\
+		BR2_TOOLCHAIN_HAS_SYNC_2 &&\
+		BR2_TOOLCHAIN_HAS_SYNC_4 &&\
+		BR2_TOOLCHAIN_HAS_SYNC_8
+	default y if (BR2_i386 && !BR2_x86_i386 && !BR2_x86_i486 \
+			&& !BR2_x86_i586 && !BR2_x86_x1000)
+	default y if BR2_x86_64
+	default y if BR2_ARM_CPU_ARMV7A
+	default y if BR2_aarch64 || BR2_aarch64_be
+
+comment "dpdk needs a glibc toolchain and a Linux Kernel to be built"
+	depends on BR2_PACKAGE_DPDK_ARCH_SUPPORTS
+	depends on !BR2_TOOLCHAIN_USES_GLIBC || !BR2_LINUX_KERNEL
+
+config BR2_PACKAGE_DPDK
+	bool "dpdk"
+	depends on BR2_PACKAGE_DPDK_ARCH_SUPPORTS
+	depends on BR2_TOOLCHAIN_USES_GLIBC
+	depends on BR2_LINUX_KERNEL
+	select BR2_LINUX_NEEDS_MODULES
+	help
+	  DPDK is a set of libraries and drivers for fast packet processing. It
+	  was designed to run on any processors, however, Intel x86 has been
+	  the first CPU to be supported. Ports for other CPUs like IBM Power 8
+	  and ARM are under progress. It runs mostly in Linux userland. A
+	  FreeBSD port is now available for a subset of DPDK features.
+
+	  Notes:
+	  * To build the included Linux Kernel drivers, it is necessary to
+	    enable CONFIG_PCI_MSI, CONFIG_UIO.
+	  * To build the PCAP PMD properly, you need to enable the libpcap
+	    manually.
+	  * You may need to install the python2 interpreter if you want to use
+	    scripts dpdk_nic_bind.py and cpu_layout.py
+
+	  http://www.dpdk.org/
+
+if BR2_PACKAGE_DPDK
+
+config BR2_PACKAGE_DPDK_CONFIG
+	string "Configuration"
+	default "i686-native-linuxapp-gcc" \
+		if BR2_x86_i686
+	default "x86_64-native-linuxapp-gcc" \
+		if BR2_x86_64
+	default "arm-armv7a-linuxapp-gcc" \
+		if BR2_ARM_CPU_ARMV7A
+	default "arm64-armv8a-linuxapp-gcc" \
+		if BR2_aarch64 || BR2_aarch64_be
+
+config BR2_PACKAGE_DPDK_TEST
+	bool "Install tests suite"
+	select BR2_PACKAGE_PYTHON_PEXPECT if BR2_PACKAGE_PYTHON
+	help
+	  Install all DPDK tests. If you want to run the tests by the included
+	  autotest.py script you need to enable python manually.
+
+endif

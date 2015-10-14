@@ -1,0 +1,31 @@
+From 524dc6e45487737f1465e7edade840613f083c8f Mon Sep 17 00:00:00 2001
+From: Jan Viktorin <viktorin@rehivetech.com>
+Date: Sat, 16 Apr 2016 00:11:18 +0200
+Subject: [PATCH] mk: do not enforce any specific ARM ABI
+
+The dpdk build system passes -mfloat-abi=softfp, which makes the build fail
+when the selected ABI is EABIhf. The dpdk build system should not make
+assumptions on the selected ARM ABI.
+
+Signed-off-by: Jan Viktorin <viktorin@rehivetech.com>
+Reported-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+---
+ mk/machine/armv7a/rte.vars.mk | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/mk/machine/armv7a/rte.vars.mk b/mk/machine/armv7a/rte.vars.mk
+index abdb15e..36fa3de 100644
+--- a/mk/machine/armv7a/rte.vars.mk
++++ b/mk/machine/armv7a/rte.vars.mk
+@@ -54,8 +54,6 @@
+ # CPU_LDFLAGS =
+ # CPU_ASFLAGS =
+ 
+-CPU_CFLAGS += -mfloat-abi=softfp
+-
+ MACHINE_CFLAGS += -march=armv7-a
+ 
+ ifdef CONFIG_RTE_ARCH_ARM_TUNE
+-- 
+2.8.0
+

@@ -1,0 +1,159 @@
+config BR2_PACKAGE_DPDK
+       bool "dpdk"
+       depends on BR2_x86_i686 || BR2_x86_64 || BR2_powerpc_power8 || BR2_ARM_CPU_ARMV7A || BR2_aarch64 || BR2_aarch64_be
+       depends on BR2_TOOLCHAIN_USES_GLIBC
+       help
+         DPDK is a set of libraries and drivers for fast packet processing. It was designed to run on
+         any processors knowing Intel x86 has been the first CPU to be supported. Ports for other CPUs
+         like IBM Power 8 and ARM are under progress. It runs mostly in Linux userland. A FreeBSD port
+         is now available for a subset of DPDK features.
+
+	 To build the included Linux Kernel drivers, it is necessary to enable CONFIG_PCI_MSI,
+	 CONFIG_UIO.
+
+         http://www.dpdk.org/
+
+if BR2_PACKAGE_DPDK
+
+choice
+	prompt "DPDK version"
+
+config BR2_PACKAGE_DPDK_VERSION_LATEST
+	bool "2.2.0"
+
+config BR2_PACKAGE_DPDK_VERSION_CUSTOM
+	bool "Custom"
+
+config BR2_PACKAGE_DPDK_CUSTOM_TARBALL
+	bool "Custom tarball"
+
+config BR2_PACKAGE_DPDK_CUSTOM_GIT
+	bool "Custom Git repository"
+
+config BR2_PACKAGE_DPDK_CUSTOM_LOCAL
+	bool "Local directory"
+
+endchoice
+
+config BR2_PACKAGE_DPDK_VERSION_CUSTOM_VALUE
+	string "DPDK version"
+	depends on BR2_PACKAGE_DPDK_VERSION_CUSTOM
+
+config BR2_PACKAGE_DPDK_CUSTOM_TARBALL_LOCATION
+	string "URL of custom DPDK tarball"
+	depends on BR2_PACKAGE_DPDK_CUSTOM_TARBALL
+
+config BR2_PACKAGE_DPDK_CUSTOM_REPO_URL
+	string "URL of custom repository"
+	depends on BR2_PACKAGE_DPDK_CUSTOM_GIT
+
+config BR2_PACKAGE_DPDK_CUSTOM_REPO_VERSION
+	string "Custom repository version"
+	depends on BR2_PACKAGE_DPDK_CUSTOM_GIT
+	help
+	  Revision to use in the typical format used by Git
+	  E.G. a sha id, a tag, branch, ..
+
+config BR2_PACKAGE_DPDK_CUSTOM_LOCAL_PATH
+	string "Path to the local directory"
+	depends on BR2_PACKAGE_DPDK_CUSTOM_LOCAL
+
+config BR2_PACKAGE_DPDK_VERSION
+	string
+	default "2.1.0" if BR2_PACKAGE_DPDK_VERSION_LATEST
+	default BR2_PACKAGE_DPDK_VERSION_CUSTOM_VALUE \
+		if BR2_PACKAGE_DPDK_VERSION_CUSTOM
+	default "custom" if BR2_PACKAGE_DPDK_CUSTOM_TARBALL
+	default BR2_PACKAGE_DPDK_CUSTOM_REPO_VERSION \
+		if BR2_PACKAGE_DPDK_CUSTOM_GIT
+	default "custom" if BR2_PACKAGE_DPDK_CUSTOM_LOCAL
+
+config BR2_PACKAGE_DPDK_PATCH
+	string "Custom DPDK patches"
+	depends on !BR2_PACKAGE_DPDK_CUSTOM_LOCAL
+	help
+	  A space-separated list of patches to apply to the
+	  kernel. Each patch can be described as an URL, a local file
+	  path, or a directory. In the case of a directory, all files
+	  matching *.patch in the directory will be applied.
+
+choice
+       prompt "DPDK configuration"
+
+config BR2_PACKAGE_DPDK_x86_i686_gcc
+       bool "i686-native-linuxapp-gcc"
+       depends on BR2_x86_i686
+
+config BR2_PACKAGE_DPDK_x86_64_gcc
+       bool "x86_64-native-linuxapp-gcc"
+       depends on BR2_x86_64
+
+config BR2_PACKAGE_DPDK_PPC8_gcc
+       bool "ppc_64-power8-native-linuxapp-gcc"
+       depends on BR2_powerpc_power8
+
+config BR2_PACKAGE_DPDK_ARMv7_gcc
+       bool "arm-armv7a-linuxapp-gcc"
+       depends on BR2_ARM_CPU_ARMV7A
+
+config BR2_PACKAGE_DPDK_ARMv8_gcc
+       bool "arm64-armv8a-linuxapp-gcc"
+       depends on BR2_aarch64 || BR2_aarch64_be
+
+config BR2_PACKAGE_DPDK_CONFIG_CUSTOM
+       bool "Custom"
+
+endchoice
+
+config BR2_PACKAGE_DPDK_CONFIG_CUSTOM_STRING
+       string "DPDK custom configuration"
+       depends on BR2_PACKAGE_DPDK_CONFIG_CUSTOM
+       help
+         See the config/ directory of DPDK for available configurations
+	 or patch it with your own one.
+
+config BR2_PACKAGE_DPDK_CONFIG
+	string
+	default BR2_PACKAGE_DPDK_CONFIG_CUSTOM_STRING \
+		if BR2_PACKAGE_DPDK_CONFIG_CUSTOM
+	default "i686-native-linuxapp-gcc" \
+		if BR2_PACKAGE_DPDK_x86_i686_gcc
+	default "x86_64-native-linuxapp-gcc" \
+		if BR2_PACKAGE_DPDK_x86_64_gcc
+	default "ppc_64-power8-native-linuxapp-gcc" \
+		if BR2_PACKAGE_DPDK_PPC8_gcc
+	default "arm-armv7a-linuxapp-gcc" \
+		if BR2_PACKAGE_DPDK_ARMv7_gcc
+	default "arm64-armv8a-linuxapp-gcc" \
+		if BR2_PACKAGE_DPDK_ARMv8_gcc
+
+config BR2_PACKAGE_DPDK_TOOLS_INSTALL
+	bool "install tools"
+	help
+	  Install applications coming with the DPDK project.
+
+config BR2_PACKAGE_DPDK_TOOLS_PYSCRIPTS
+	bool "helper scripts"
+	depends on BR2_PACKAGE_DPDK_TOOLS_INSTALL
+	depends on BR2_PACKAGE_PYTHON
+	help
+	  DPDK provides few Python scripts to determine configuration
+	  and status of the system and to configure drivers. These are:
+	  dpdk_nic_bind.py and cpu_layout.py. By enabling this option,
+	  the scripts are installed into the target system together with
+	  a Python 2 interpreter.
+
+config BR2_PACKAGE_DPDK_TOOLS_TESTPMD
+	bool "testpmd"
+	default y
+	depends on BR2_PACKAGE_DPDK_TOOLS_INSTALL
+	help
+	  Install application for general testing of DPDK and PMD drivers.
+
+config BR2_PACKAGE_DPDK_TOOLS_TEST
+	bool "tests suite"
+	depends on BR2_PACKAGE_DPDK_TOOLS_INSTALL
+	help
+	  Install all DPDK tests.
+
+endif

@@ -57,4 +57,9 @@ config BR2_PACKAGE_DPDK_TEST
 	  Install all DPDK tests. If you want to run the tests by the included
 	  autotest.py script you need to enable python manually.
 
+config BR2_PACKAGE_DPDK_EXAMPLES
+	bool "Build & install examples"
+	help
+	  Build and install all examples selected by the current configuration.
+
 endif
